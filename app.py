@@ -48,10 +48,30 @@ def login_required(f):
 def index():
     return render_template("index.html")
 
-@app.route("/list")
+@app.route("/list", methods=["GET", "POST"])
 @login_required
 def shopping_list():
-    return render_template("list.html")
+    if request.method == "POST":
+        item = request.form.get("item")
+        notes = request.form.get("notes")
+
+        rows = db.execute("SELECT * FROM list WHERE item = ?", item)
+        if len(rows) != 0:
+            return apology("Item already in list")
+
+        db.execute("INSERT INTO list (user_id, item, note) VALUES(?, ?, ?)", session["user_id"], item, notes)
+        return redirect("/list")
+
+    else:
+        all_items = db.execute("SELECT * FROM list WHERE user_id = ?", session["user_id"])
+        return render_template("list.html", all_items=all_items)
+
+@app.route("/delete_item", methods=["POST"])
+@login_required
+def delete_item():
+    item = request.form.get("value")
+    db.execute("DELETE FROM list WHERE user_id = ? AND item = ?", session["user_id"], item)
+    return redirect("/list")
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
@@ -164,3 +184,4 @@ def account():
         # get username
         username = db.execute("SELECT username FROM users WHERE id = ?", user_id)
         return render_template("account.html", username=username[0]["username"])
+

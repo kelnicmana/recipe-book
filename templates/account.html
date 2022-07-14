@@ -6,7 +6,7 @@
 
 {% block main %}
     <div class="container">
-        <h5>Username: {{ username }}</h5>
+        <h5 class="mb-3">Username: {{ username }}</h5>
         <h5>Change password:</h5>
         <form action="/account" method="post">
             <div class="mb-3">
@@ -18,7 +18,7 @@
             <div class="mb-3">
                 <input class="form-control w-auto" id="confirmation" name="confirmation" placeholder="Verify New Password" type="password">
             </div>
-            <button class="btn btn-primary" type="submit">Submit</button>
+            <button class="btn btn-secondary" type="submit">Submit</button>
         </form>
     </div>
 {% endblock %}
