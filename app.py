@@ -55,16 +55,30 @@ def shopping_list():
         item = request.form.get("item")
         notes = request.form.get("notes")
 
-        rows = db.execute("SELECT * FROM list WHERE item = ?", item)
+        rows = db.execute("SELECT * FROM list WHERE user_id = ? AND item = ?", session["user_id"], item)
         if len(rows) != 0:
             return apology("Item already in list")
 
-        db.execute("INSERT INTO list (user_id, item, note) VALUES(?, ?, ?)", session["user_id"], item, notes)
+        db.execute("INSERT INTO list (user_id, item, note, status) VALUES(?, ?, ?, 'on')", session["user_id"], item, notes)
         return redirect("/list")
 
     else:
         all_items = db.execute("SELECT * FROM list WHERE user_id = ?", session["user_id"])
         return render_template("list.html", all_items=all_items)
+
+
+@app.route("/toggle_item", methods=["POST"])
+@login_required
+def toggle_item():
+    status = request.form.get("status")
+    item = request.form.get("item")
+
+    if status == "on":
+        db.execute("UPDATE list SET status='off' WHERE user_id = ? AND item = ?", session["user_id"], item)
+
+    else:
+        db.execute("UPDATE list SET status='on' WHERE user_id = ? AND item = ?", session["user_id"], item)
+    return redirect("/list")
 
 @app.route("/delete_item", methods=["POST"])
 @login_required
@@ -151,6 +165,12 @@ def logout():
 
     # Redirect user to login form
     return redirect("/")
+
+
+@app.route("/recipe", methods=["GET", "POST"])
+@login_required
+def recipe():
+    return render_template("recipe.html")
 
 
 @app.route("/account", methods=["GET", "POST"])
