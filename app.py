@@ -43,10 +43,31 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
-@app.route("/")
+@app.route("/", methods=["GET", "POST"])
 @login_required
 def index():
-    return render_template("index.html")
+    if request.method == "POST":
+        name = request.form.get("recipe_name")
+
+        rows = db.execute("SELECT * FROM recipes WHERE user_id = ? AND name = ?", session["user_id"], name)
+        if len(rows) != 0:
+            return apology("That recipe name already exists")
+
+        db.execute("INSERT INTO recipes (user_id, name) VALUES(?, ?)", session["user_id"], name)
+        return redirect("/")
+
+    else:
+        recipe_list = db.execute("SELECT * FROM recipes WHERE user_id = ?", session["user_id"])
+        return render_template("index.html", recipe_list=recipe_list)
+
+
+@app.route("/delete_recipe", methods=["POST"])
+@login_required
+def delete_recipe():
+    recipe = request.form.get("value")
+    db.execute("DELETE FROM recipes WHERE user_id = ? AND name = ?", session["user_id"], recipe)
+    return redirect("/")
+
 
 @app.route("/list", methods=["GET", "POST"])
 @login_required

@@ -6,6 +6,35 @@
 
 {% block main %}
     <div class="container">
+
+        <button type="button" class="btn btn-secondary mb-3" data-bs-toggle="modal" data-bs-target="#itemModal">
+            Add recipe
+        </button>
+        
+        <div class="modal fade" id="itemModal" tabindex="-1" role="dialog" aria-labelledby="itemModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="itemModalLabel">Add new recipe</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true"></span>
+                        </button>
+                    </div>
+                
+                    <div class="modal-body">
+                        <form action="/" method="post">
+                            <div class="mb-3">
+                                <input autocomplete="off" class="form-control" id="recipe_name" name="recipe_name" placeholder="recipe name" type="text" maxlength="35" required>
+                            </div>
+                            <div class="mb-3 text-center">
+                                <button type="submit" class="btn btn-secondary">Add item</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div> 
+
         <table class="table table-striped">
             <thead>
                 <tr>
@@ -13,18 +42,30 @@
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td>Chicken and Dumplings</td>
-                </tr>
-                <tr>
-                    <td>Lasagna</td>
-                </tr>
-                <tr>
-                    <td>Chili</td>
-                </tr>
-                <tr>
-                    <td>Macaroni and Cheese</td>
-                </tr>
+                {% for recipe in recipe_list %}
+                    <tr>
+                        <td>
+                            <form action="/recipe" method="post">
+                                <button class="btn bg-transparent py-0" type="submit">{{ recipe.name }}</button>
+                            </form>
+                        </td>
+                        <td>
+                            <form action="/delete_recipe" method="post">
+                                <input type="hidden" id="value" name="value" value="{{ recipe.name }}">
+                                <button class="btn bg-transparent btn-sm" type="submit">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" id="{{ recipe.name }}" viewBox="0 0 16 16">
+                                        <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
+                                        <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
+                                        </svg>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td>No recipes added yet!</td>
+                    </tr>
+                {% endfor %}
             </tbody>
         </table>
     </div>
