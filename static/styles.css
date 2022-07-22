@@ -2,7 +2,7 @@
     display: inline-block;
 }
 
-.recipe_header {
+.recipe_header, .ingredients_li {
     display: flex;
     justify-content: space-between;
     align-items: center;

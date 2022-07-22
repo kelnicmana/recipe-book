@@ -192,8 +192,69 @@ def logout():
 @login_required
 def recipe():
     if request.method == "POST":
-        #
-    return render_template("recipe.html")
+        # get the recipe name
+        recipe_name = request.form.get("recipeName")
+        db.execute("UPDATE users SET current_recipe = ? WHERE id = ?", recipe_name, session["user_id"])
+        recipe = db.execute("SELECT * FROM recipes WHERE name = ? AND user_id = ?", recipe_name, session["user_id"])
+        # send the recipe name variable to the recipe page when it loads
+        ingredient_list = db.execute("SELECT * FROM ingredients WHERE user_id = ? AND recipe_id = ?", session["user_id"], recipe[0]["id"])
+        return render_template("recipe.html", recipe_name=recipe_name, recipe=recipe, ingredient_list=ingredient_list)
+    else: 
+        current_recipe = db.execute("SELECT current_recipe FROM users WHERE id = ?", session["user_id"])
+        recipe = db.execute("SELECT * FROM recipes WHERE name = ? AND user_id = ?", current_recipe[0]["current_recipe"], session["user_id"])
+        ingredient_list = db.execute("SELECT * FROM ingredients WHERE user_id = ? AND recipe_id = ?", session["user_id"], recipe[0]["id"])
+        return render_template("recipe.html", recipe=recipe, ingredient_list=ingredient_list)
+
+
+@app.route("/ingredient", methods=["POST"])
+@login_required
+def ingredient():
+    ingredient = request.form.get("ingredient")
+    amount = request.form.get("ingredient_amount")
+    recipe_id = request.form.get("ingredient_recipe")
+
+    rows = db.execute("SELECT * FROM ingredients WHERE user_id = ? AND recipe_id = ? AND item = ?", session["user_id"], recipe_id, ingredient)
+    if len(rows) != 0:
+        return apology("Ingredient already in recipe")
+
+    db.execute("INSERT INTO ingredients (user_id, recipe_id, amount, item) VALUES(?, ?, ?, ?)", session["user_id"], recipe_id, amount, ingredient)
+    return redirect("/recipe")
+
+
+@app.route("/delete_ingredient", methods=["POST"])
+@login_required
+def delete_ingredient():
+    recipe_id = request.form.get("recipe_id")
+    recipe_name = request.form.get("recipe_name")
+    db.execute("DELETE FROM ingredients WHERE user_id = ? AND recipe_id = ? AND item = ?", session["user_id"], recipe_id, recipe_name)
+    return redirect("/recipe")
+
+
+@app.route("/prep", methods=["POST"])
+@login_required
+def prep():
+    prep = request.form.get("prep")
+    name = request.form.get("prep_recipe")
+    db.execute("UPDATE recipes SET prep_direction = ? WHERE user_id = ? AND name = ?", prep, session["user_id"], name)
+    return redirect("/recipe")
+
+
+@app.route("/cook", methods=["POST"])
+@login_required
+def cook():
+    cook = request.form.get("cook")
+    name = request.form.get("cook_recipe")
+    db.execute("UPDATE recipes SET cook_direction = ? WHERE user_id = ? AND name = ?", cook, session["user_id"], name)
+    return redirect("/recipe")
+
+
+@app.route("/note", methods=["POST"])
+@login_required
+def note():
+    notes = request.form.get("note")
+    name = request.form.get("note_recipe")
+    db.execute("UPDATE recipes SET notes = ? WHERE user_id = ? AND name = ?", notes, session["user_id"], name)
+    return redirect("/recipe")
 
 
 @app.route("/account", methods=["GET", "POST"])

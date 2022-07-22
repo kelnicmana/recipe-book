@@ -1,50 +1,209 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Chicken and Dumplings
+    {{ recipe_name }}
 {% endblock %}
 
 {% block main %}
     <div class="container">
         <div class="card">
-            <h1 class="card-header display-5 mb-3">Chicken and Dumplings</h1>
+            <h1 class="card-header display-5 mb-3">{{ recipe[0].name }}</h1>
         <div class="card mb-3 mx-auto" style="width: 80%;">
             <div class="card-header recipe_header">
-              <span class="lead">Ingredients</span><span class="ms-5 small">(<em>edit</em>)</span>
+              <span class="lead">Ingredients</span><span class="ms-5 small">
+                    <button type="button" class="btn bg-transparent btn-sm" data-bs-toggle="modal" data-bs-target="#ingredientModal">
+                        (<em>add</em>)
+                    </button>
+              </span>
             </div>
             <ul class="list-group list-group-flush">
-              <li class="list-group-item">3c flour</li>
-              <li class="list-group-item">1 egg</li>
-              <li class="list-group-item">1 tsp baking powder</li>
-              <li class="list-group-item">2 chicken breasts</li>
-              <li class="list-group-item">9c water</li>
-              <li class="list-group-item">11 chicken bouillon cubes</li>
+                {% for ingredient in ingredient_list %}
+                    <li class="list-group-item mx-3 ingredients_li"><span>{{ ingredient.amount }} {{ ingredient.item }}</span>
+                        <form action="/delete_ingredient" method="post">
+                            <input type="hidden" id="recipe_id" name="recipe_id" value="{{ ingredient.recipe_id }}">
+                            <input type="hidden" id="recipe_name" name="recipe_name" value="{{ ingredient.item }}">
+                            <button class="btn bg-transparent btn-sm" type="submit">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" id="{{ ingredient.item }}" viewBox="0 0 16 16">
+                                <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z"/>
+                                <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"/>
+                                </svg>
+                            </button>
+                        </form>
+                    </li>
+                {% else %}
+                    <li class="list-group-item mx-3">No ingredients added yet.</li>
+                {% endfor %}
             </ul>
         </div>
         <div class="card mb-3 mx-auto" style="width: 80%;">
             <div class="card-header recipe_header">
-                <span class="lead">Preperation Directions</span><span class="ms-5 small">(<em>edit</em>)</span>
+                <span class="lead">Preperation Directions</span><span class="ms-5 small">
+                    <button type="button" class="btn bg-transparent btn-sm" data-bs-toggle="modal" data-bs-target="#prepModal">
+                        (<em>edit</em>)
+                    </button>
+                </span>
             </div>
-            <div class="card-body">
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Harum iure, amet ipsum voluptatibus facere natus placeat quaerat corrupti reiciendis, sed ex enim. Iste hic reiciendis suscipit accusamus deleniti nemo possimus.
-            </div>
-        </div>
-        <div class="card mb-3 mx-auto" style="width: 80%;">
-            <div class="card-header recipe_header">
-                <span class="lead">Cooking Directions</span><span class="ms-5 small">(<em>edit</em>)</span>
-            </div>
-            <div class="card-body">
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Harum iure, amet ipsum voluptatibus facere natus placeat quaerat corrupti reiciendis, sed ex enim. Iste hic reiciendis suscipit accusamus deleniti nemo possimus.
+            <div class="card-body mx-2 text-muted">
+                {{ recipe[0].prep_direction }}
             </div>
         </div>
         <div class="card mb-3 mx-auto" style="width: 80%;">
             <div class="card-header recipe_header">
-                <span class="lead">Notes</span><span class="ms-5 small">(<em>edit</em>)</span>
+                <span class="lead">Cooking Directions</span><span class="ms-5 small">
+                    <button type="button" class="btn bg-transparent btn-sm" data-bs-toggle="modal" data-bs-target="#cookModal">
+                        (<em>edit</em>)
+                    </button>
+                </span>
             </div>
-            <div class="card-body">
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Harum iure, amet ipsum voluptatibus facere natus placeat quaerat corrupti reiciendis, sed ex enim. Iste hic reiciendis suscipit accusamus deleniti nemo possimus.
+            <div class="card-body mx-2 text-muted">
+                {{ recipe[0].cook_direction }}
+            </div>
+        </div>
+        <div class="card mb-3 mx-auto" style="width: 80%;">
+            <div class="card-header recipe_header">
+                <span class="lead">Notes</span><span class="ms-5 small">
+                    <button type="button" class="btn bg-transparent btn-sm" data-bs-toggle="modal" data-bs-target="#noteModal">
+                        (<em>edit</em>)
+                    </button>
+                </span>
+            </div>
+            <div class="card-body mx-2 text-muted">
+                {{ recipe[0].notes }}
             </div>
         </div>
         </div>
     </div>
+
+    <!-- modals -->
+    <div class="modal fade" id="ingredientModal" tabindex="-1" role="dialog" aria-labelledby="ingredientModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="ingredientModalLabel">Add ingredients</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true"></span>
+                    </button>
+                </div>
+            
+                <div class="modal-body">
+                    <form action="/ingredient" method="post">
+                        <div class="mb-3">
+                            <input type="hidden" id="ingredient_recipe" name="ingredient_recipe" value="{{ recipe[0].id }}">
+                            <input autocomplete="off" class="form-control mb-3" id="ingredient" name="ingredient" placeholder="ingredient" type="text" maxlength="35" required>
+                            <input autocomplete="off" class="form-control mb-3" id="ingredient_amount" name="ingredient_amount" placeholder="amount (example: 1 cup) (optional)" type="text" maxlength="35">  
+                        </div>
+                        <div class="mb-3 text-center">
+                            <button type="submit" class="btn btn-secondary">Add</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div> 
+
+    <div class="modal fade" id="prepModal" tabindex="-1" role="dialog" aria-labelledby="prepModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="prepModalLabel">Add preperation directions</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true"></span>
+                    </button>
+                </div>
+            
+                <div class="modal-body">
+                    <form action="/prep" method="post">
+                        <div class="mb-3">
+                            <input type="hidden" id="prep_recipe" name="prep_recipe" value="{{ recipe[0].name }}">
+                            <textarea autocomplete="off" class="form-control" id="prep" name="prep" placeholder="preperation directions" rows="3" required></textarea>
+                        </div>
+                        <div class="mb-3 text-center">
+                            <button type="submit" class="btn btn-secondary">Add</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div> 
+
+    <div class="modal fade" id="cookModal" tabindex="-1" role="dialog" aria-labelledby="cookModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="cookModalLabel">Add cooking directions</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true"></span>
+                    </button>
+                </div>
+            
+                <div class="modal-body">
+                    <form action="/cook" method="post">
+                        <div class="mb-3">
+                            <input type="hidden" id="cook_recipe" name="cook_recipe" value="{{ recipe[0].name }}">
+                            <textarea autocomplete="off" class="form-control" id="cook" name="cook" placeholder="cooking directions" rows="3" required></textarea>
+                        </div>
+                        <div class="mb-3 text-center">
+                            <button type="submit" class="btn btn-secondary">Add</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div> 
+
+    <div class="modal fade" id="noteModal" tabindex="-1" role="dialog" aria-labelledby="noteModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="noteModalLabel">Add note</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true"></span>
+                    </button>
+                </div>
+            
+                <div class="modal-body">
+                    <form action="/note" method="post">
+                        <div class="mb-3">
+                            <input type="hidden" id="note_recipe" name="note_recipe" value="{{ recipe[0].name }}">
+                            <textarea autocomplete="off" class="form-control" id="note" name="note" placeholder="notes" rows="3" required></textarea>
+                        </div>
+                        <div class="mb-3 text-center">
+                            <button type="submit" class="btn btn-secondary">Add</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div> 
+
+    <script>
+        var ingredientModal = document.getElementById('ingredientModal')
+        var ingredientInput = document.getElementById('ingredient')
+
+        ingredientModal.addEventListener('shown.bs.modal', function () {
+        ingredientInput.focus()
+        })
+
+        var prepModal = document.getElementById('prepModal')
+        var prepInput = document.getElementById('prep')
+
+        prepModal.addEventListener('shown.bs.modal', function () {
+        prepInput.focus()
+        })
+
+        var cookModal = document.getElementById('cookModal')
+        var cookInput = document.getElementById('cook')
+
+        cookModal.addEventListener('shown.bs.modal', function () {
+        cookInput.focus()
+        })
+
+        var noteModal = document.getElementById('noteModal')
+        var noteInput = document.getElementById('note')
+
+        noteModal.addEventListener('shown.bs.modal', function () {
+        noteInput.focus()
+        })
+        
+    </script>
 {% endblock %}

@@ -7,15 +7,15 @@
 {% block main %}
     <div class="container">
 
-        <button type="button" class="btn btn-secondary mb-3" data-bs-toggle="modal" data-bs-target="#itemModal">
+        <button type="button" class="btn btn-secondary mb-3" data-bs-toggle="modal" data-bs-target="#recipeModal">
             <p class="lead m-0">Add recipe</p>
         </button>
         
-        <div class="modal fade" id="itemModal" tabindex="-1" role="dialog" aria-labelledby="itemModalLabel" aria-hidden="true">
+        <div class="modal fade" id="recipeModal" tabindex="-1" role="dialog" aria-labelledby="recipeModalLabel" aria-hidden="true">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="itemModalLabel">Add new recipe</h5>
+                        <h5 class="modal-title" id="recipeModalLabel">Add new recipe</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true"></span>
                         </button>
@@ -46,6 +46,7 @@
                     <tr>
                         <td>
                             <form action="/recipe" method="post">
+                                <input type="hidden" id="recipeName" name="recipeName" value="{{ recipe.name }}">
                                 <button class="btn bg-transparent py-0" type="submit">{{ recipe.name }}</button>
                             </form>
                         </td>
@@ -69,4 +70,14 @@
             </tbody>
         </table>
     </div>
+
+    <script>
+        var recipeModal = document.getElementById('recipeModal')
+        var recipeInput = document.getElementById('recipe_name')
+
+        recipeModal.addEventListener('shown.bs.modal', function () {
+        recipeInput.focus()
+        })
+        
+    </script>
 {% endblock %}
