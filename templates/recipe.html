@@ -115,7 +115,11 @@
                     <form action="/prep" method="post">
                         <div class="mb-3">
                             <input type="hidden" id="prep_recipe" name="prep_recipe" value="{{ recipe[0].name }}">
-                            <textarea autocomplete="off" class="form-control" id="prep" name="prep" placeholder="preperation directions" rows="3" required></textarea>
+                            {% if not recipe[0].notes %}
+                                <textarea autocomplete="off" class="form-control" id="prep" name="prep" placeholder="preperation directions" rows="3" required></textarea>
+                            {% else %}
+                                <textarea autocomplete="off" class="form-control" id="prep" name="prep" placeholder="preperation directions" rows="3" required>{{ recipe[0].prep_direction }}</textarea>
+                            {% endif %}
                         </div>
                         <div class="mb-3 text-center">
                             <button type="submit" class="btn btn-secondary">Add</button>
@@ -140,7 +144,11 @@
                     <form action="/cook" method="post">
                         <div class="mb-3">
                             <input type="hidden" id="cook_recipe" name="cook_recipe" value="{{ recipe[0].name }}">
-                            <textarea autocomplete="off" class="form-control" id="cook" name="cook" placeholder="cooking directions" rows="3" required></textarea>
+                            {% if not recipe[0].notes %}
+                                <textarea autocomplete="off" class="form-control" id="cook" name="cook" placeholder="cooking directions" rows="3" required></textarea>
+                            {% else %}
+                                <textarea autocomplete="off" class="form-control" id="cook" name="cook" placeholder="cooking directions" rows="3" required>{{ recipe[0].cook_direction }}</textarea>
+                            {% endif %}
                         </div>
                         <div class="mb-3 text-center">
                             <button type="submit" class="btn btn-secondary">Add</button>
@@ -165,7 +173,11 @@
                     <form action="/note" method="post">
                         <div class="mb-3">
                             <input type="hidden" id="note_recipe" name="note_recipe" value="{{ recipe[0].name }}">
-                            <textarea autocomplete="off" class="form-control" id="note" name="note" placeholder="notes" rows="3" required></textarea>
+                            {% if not recipe[0].notes %}
+                                <textarea autocomplete="off" class="form-control" id="note" name="note" placeholder="notes" rows="3" required></textarea>
+                            {% else %}
+                                <textarea autocomplete="off" class="form-control" id="note" name="note" placeholder="notes" rows="3" required>{{ recipe[0].notes }}</textarea>
+                            {% endif %}
                         </div>
                         <div class="mb-3 text-center">
                             <button type="submit" class="btn btn-secondary">Add</button>
