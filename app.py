@@ -191,6 +191,8 @@ def logout():
 @app.route("/recipe", methods=["GET", "POST"])
 @login_required
 def recipe():
+    if request.method == "POST":
+        #
     return render_template("recipe.html")
 
 

@@ -12,13 +12,15 @@
             <div class="card mb-3 mx-auto" style="width: 80%;">
                 <ul class="list-group list-group-flush">
                     <li class="list-group-item">
-                        <p class="my-3 h5">Username: {{ username }}</p>
+                        <p class="mx-2 mt-3 h5">Username: 
+                            <p class="mx-4">{{ username }}</p>
+                        </p>
                     </li>
                     <li class="list-group-item">
-                        <p class="h5 my-3 mb-3">Change password:</p>
-                        <form action="/account" method="post">
+                        <p class="h5 mx-2 my-3 mb-3">Change password:</p>
+                        <form class="mx-4" action="/account" method="post">
                             <div class="mb-3">
-                                <input autofocus class="form-control w-auto" id="old_password" name="old_password" placeholder="Current Password" type="password">
+                                <input class="form-control w-auto" id="old_password" name="old_password" placeholder="Current Password" type="password">
                             </div>
                             <div class="mb-3">
                                 <input class="form-control w-auto" id="password" name="password" placeholder="New Password" type="password">
