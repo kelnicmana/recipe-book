@@ -54,7 +54,6 @@ SecretStorage==3.3.2
 service-identity==21.1.0
 simplejson==3.17.6
 six==1.16.0
-sos==4.3
 sqlacodegen==2.3.0
 SQLAlchemy==1.4.39
 sqlparse==0.4.2
