@@ -14,7 +14,7 @@
         </button>
         
         <div class="modal fade" id="itemModal" tabindex="-1" role="dialog" aria-labelledby="itemModalLabel" aria-hidden="true">
-            <div class="modal-dialog" role="document">
+            <div class="modal-dialog modal-dialog-centered" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title" id="itemModalLabel">Add new item</h5>
@@ -39,7 +39,7 @@
                 </div>
             </div>
         </div>  
-        
+
         <table class="table table-striped table-sm">
             <thead>
                 <tr>
@@ -66,11 +66,42 @@
                                 {% endif %}
                             </button>
                         </form>
-                        {% if each.status == "on" %}
-                            <span class="items">{{ each.item }}</span>
-                        {% else %}
-                            <span class="items"><s>{{ each.item }}</s></span>
-                        {% endif %}
+                        <button type="button" class="btn bg-transparent" data-bs-toggle="modal" data-bs-target="#{{ each.item }}">
+                            {% if each.status == "on" %}
+                                <span class="items">{{ each.item }}</span>
+                            {% else %}
+                                <span class="items"><s>{{ each.item }}</s></span>
+                            {% endif %}
+                        </button>
+
+                        <!-- notes modals -->
+                        {% for each in all_items %}
+                        <div class="modal fade" id="{{ each.item }}" tabindex="-1" role="dialog" aria-labelledby="{{ each.item }}Label" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="{{ each.item }}Label">Notes</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true"></span>
+                                        </button>
+                                    </div>
+                                
+                                    <div class="modal-body">
+                                        <div class="mb-3">
+                                            {% if each.note == "" %}
+                                                <p class="text-muted">No note added</p>
+                                            {% else %}
+                                                <p>{{ each.note }}</p>
+                                            {% endif %}
+                                        </div>
+                                        
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div> 
+                    {% endfor %}
+    
                     </td>
                     <td>
                         <form action="/delete_item" method="post">
@@ -91,6 +122,8 @@
                 {% endfor %}
             </tbody>
         </table>
+
+
     </div>
     <script>
         var myModal = document.getElementById('itemModal')

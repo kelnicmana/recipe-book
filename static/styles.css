@@ -1,4 +1,4 @@
-.toggleForm {
+.toggleForm, .notesForm {
     display: inline-block;
 }
 

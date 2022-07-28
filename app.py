@@ -1,13 +1,92 @@
 import os
 
-from cs50 import SQL
+#from cs50 import SQL
 from flask import Flask, flash, redirect, render_template, request, session
 from flask_session import Session
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import Column, Integer, Table, Text, delete, update, select, asc
+from sqlalchemy.sql.sqltypes import NullType
+from sqlalchemy.ext.declarative import declarative_base
 from functools import wraps
 from tempfile import mkdtemp
 from werkzeug.security import check_password_hash, generate_password_hash
 
 app = Flask(__name__)
+
+
+# heroku postgres url
+# SQLALCHEMY_DATABASE_URI = "postgres://qdbbbsaexyymee:796582f42d29bf52bff19a0d3c8893916431886e1133f6e2a1fa0f30e33814fb@ec2-18-214-35-70.compute-1.amazonaws.com:5432/d82ot6jms8h2fj".replace("postgres://", "postgresql://", 1)
+
+app.config["SQLALCHEMY_DATABASE_URI"] = 'postgresql://postgres:Eillek86@localhost/postgres_recipes'
+
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
+# Initialize the database
+db = SQLAlchemy(app)
+
+
+class User(db.Model):
+    __tablename__ = 'users'
+
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.Text(), nullable=False)
+    hash = db.Column(db.Text(), nullable=False)
+    current_recipe = db.Column(db.Text())
+    
+    def __init__(self, username, hash, current_recipe):
+        self.username = username
+        self.hash = hash
+        self.current_recipe = current_recipe
+
+
+class Recipe(db.Model):
+    __tablename__ = 'recipes'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer)
+    prep_direction = db.Column(db.Text())
+    cook_direction = Column(db.Text())
+    notes = db.Column(db.Text())
+    name = db.Column(db.Text())
+
+    def __init__(self, user_id, prep_direction, cook_direction, notes, name):
+        self.user_id = user_id
+        self.prep_direction = prep_direction
+        self.cook_direction = cook_direction
+        self.notes = notes
+        self.name = name
+
+
+class Ingredients(db.Model):
+    __tablename__ = 'ingredients'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer)
+    recipe_id = db.Column(db.Integer)
+    amount = db.Column(db.Text())
+    item = db.Column(db.Text())
+
+    def __init__(self, user_id, recipe_id, amount, item):
+        self.user_id = user_id
+        self.recipe_id = recipe_id
+        self.amount = amount
+        self.item = item
+
+
+class List(db.Model):
+    __tablename__ = 'list'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer)
+    item = db.Column(db.Text())
+    note = db.Column(db.Text())
+    status = db.Column(db.Text())
+
+    def __init__(self, user_id, item, note, status):
+        self.user_id = user_id
+        self.item = item
+        self.note = note
+        self.status = status
 
 # Ensure templates are auto-reloaded
 app.config["TEMPLATES_AUTO_RELOAD"] = True
@@ -17,7 +96,7 @@ app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
-db = SQL("sqlite:///recipes.db")
+#db = SQL("sqlite:///recipes.db")
 
 @app.after_request
 def after_request(response):
@@ -33,8 +112,8 @@ def apology(message):
 
 def login_required(f):
     """
-    Decorate routes to require login.
-    https://flask.palletsprojects.com/en/1.1.x/patterns/viewdecorators/
+    Decorate routes to require login. More info in link.
+    https://flask.palletsprojects.com/en/2.1.x/patterns/viewdecorators/
     """
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -49,15 +128,18 @@ def index():
     if request.method == "POST":
         name = request.form.get("recipe_name")
 
-        rows = db.execute("SELECT * FROM recipes WHERE user_id = ? AND name = ?", session["user_id"], name)
-        if len(rows) != 0:
+        rows = db.session.query(Recipe).filter(Recipe.name == name).filter(Recipe.user_id == session["user_id"]).count()
+        if rows != 0:
             return apology("That recipe name already exists")
 
-        db.execute("INSERT INTO recipes (user_id, name) VALUES(?, ?)", session["user_id"], name)
+        data = Recipe(user_id=session["user_id"], name=name, prep_direction="", cook_direction="", notes="")
+        db.session.add(data)
+        db.session.commit()
+
         return redirect("/")
 
     else:
-        recipe_list = db.execute("SELECT * FROM recipes WHERE user_id = ?", session["user_id"])
+        recipe_list = db.session.query(Recipe).filter(Recipe.user_id == session["user_id"])
         return render_template("index.html", recipe_list=recipe_list)
 
 
@@ -65,7 +147,8 @@ def index():
 @login_required
 def delete_recipe():
     recipe = request.form.get("value")
-    db.execute("DELETE FROM recipes WHERE user_id = ? AND name = ?", session["user_id"], recipe)
+    db.session.query(Recipe).filter(Recipe.user_id == session["user_id"]).filter(Recipe.name == recipe).delete()
+    db.session.commit()
     return redirect("/")
 
 
@@ -76,15 +159,17 @@ def shopping_list():
         item = request.form.get("item")
         notes = request.form.get("notes")
 
-        rows = db.execute("SELECT * FROM list WHERE user_id = ? AND item = ?", session["user_id"], item)
-        if len(rows) != 0:
+        rows = db.session.query(List).filter(List.user_id == session["user_id"]).filter(List.item == item).count()
+        if rows != 0:
             return apology("Item already in list")
 
-        db.execute("INSERT INTO list (user_id, item, note, status) VALUES(?, ?, ?, 'on')", session["user_id"], item, notes)
+        data = List(user_id=session["user_id"], item=item, note=notes, status="on")
+        db.session.add(data)
+        db.session.commit()
         return redirect("/list")
 
     else:
-        all_items = db.execute("SELECT * FROM list WHERE user_id = ?", session["user_id"])
+        all_items = db.session.query(List).filter(List.user_id == session["user_id"]).order_by(asc(List.id))
         return render_template("list.html", all_items=all_items)
 
 
@@ -95,17 +180,22 @@ def toggle_item():
     item = request.form.get("item")
 
     if status == "on":
-        db.execute("UPDATE list SET status='off' WHERE user_id = ? AND item = ?", session["user_id"], item)
+        user_row = db.session.query(List).filter(List.user_id == session["user_id"]).filter(List.item == item).first()
+        user_row.status = "off"
+        db.session.commit()
 
     else:
-        db.execute("UPDATE list SET status='on' WHERE user_id = ? AND item = ?", session["user_id"], item)
+        user_row = db.session.query(List).filter(List.user_id == session["user_id"]).filter(List.item == item).first()
+        user_row.status = "on"
+        db.session.commit()
     return redirect("/list")
 
 @app.route("/delete_item", methods=["POST"])
 @login_required
 def delete_item():
     item = request.form.get("value")
-    db.execute("DELETE FROM list WHERE user_id = ? AND item = ?", session["user_id"], item)
+    db.session.query(List).filter(List.user_id == session["user_id"]).filter(List.item == item).delete()
+    db.session.commit()
     return redirect("/list")
 
 @app.route("/register", methods=["GET", "POST"])
@@ -122,17 +212,20 @@ def register():
         if password != verify_password:
             return apology("Password fields do not match")
 
-        rows = db.execute("SELECT * FROM users WHERE username = ?", username)
         # verifies that the username is not already in use
-        if len(rows) != 0:
+        rows = db.session.query(User).filter(User.username == username).count()
+        if rows != 0:
             return apology("Username is unavailable")
 
         hash = generate_password_hash(password)
+
         # inserts the username and hash for the password into the users table
-        db.execute("INSERT INTO users (username, hash) VALUES(?, ?)", username, hash)
-        user = db.execute("SELECT * FROM users WHERE username = ?", username)
+        data = User(username=username, hash=hash, current_recipe="")
+        db.session.add(data)
+        db.session.commit()
+    
         # sets the session to be for the current user
-        session["user_id"] = user[0]["id"]
+        session["user_id"] = db.session.query(User).filter(User.username == username).first().id
 
         return redirect("/")
 
@@ -159,14 +252,16 @@ def login():
             return apology("must provide password")
 
         # Query database for username
-        rows = db.execute("SELECT * FROM users WHERE username = ?", request.form.get("username"))
+        username = request.form.get("username")
+        user_data = db.session.query(User).filter(User.username == username)
+        rows = db.session.query(User).filter(User.username == username).count()
 
         # Ensure username exists and password is correct
-        if len(rows) != 1 or not check_password_hash(rows[0]["hash"], request.form.get("password")):
+        if rows != 1 or not check_password_hash(user_data[0].hash, request.form.get("password")):
             return apology("invalid username and/or password")
 
         # Remember which user has logged in
-        session["user_id"] = rows[0]["id"]
+        session["user_id"] = user_data[0].id
 
         # Redirect user to home page
         return redirect("/")
@@ -192,41 +287,55 @@ def logout():
 @login_required
 def recipe():
     if request.method == "POST":
-        # get the recipe name
+        # get the recipe name the user selected
         recipe_name = request.form.get("recipeName")
-        db.execute("UPDATE users SET current_recipe = ? WHERE id = ?", recipe_name, session["user_id"])
-        recipe = db.execute("SELECT * FROM recipes WHERE name = ? AND user_id = ?", recipe_name, session["user_id"])
-        # send the recipe name variable to the recipe page when it loads
-        ingredient_list = db.execute("SELECT * FROM ingredients WHERE user_id = ? AND recipe_id = ?", session["user_id"], recipe[0]["id"])
+        # set that recipe as the user's currently selected recipe in the db
+        db.session.query(User).filter(User.id == session["user_id"]).first().current_recipe = recipe_name
+        db.session.commit()
+        # gets the db row for that recipe
+        recipe = db.session.query(Recipe).filter(Recipe.name == recipe_name).filter(Recipe.user_id == session["user_id"]).first()
+        # query the ingredients table for all ingredients for the current recipe
+        ingredient_list = db.session.query(Ingredients).filter(Ingredients.user_id == session["user_id"]).filter(Ingredients.recipe_id == recipe.id)
+        # renders the template and sends the variables for use in the html/jinja
         return render_template("recipe.html", recipe_name=recipe_name, recipe=recipe, ingredient_list=ingredient_list)
-    else: 
-        current_recipe = db.execute("SELECT current_recipe FROM users WHERE id = ?", session["user_id"])
-        recipe = db.execute("SELECT * FROM recipes WHERE name = ? AND user_id = ?", current_recipe[0]["current_recipe"], session["user_id"])
-        ingredient_list = db.execute("SELECT * FROM ingredients WHERE user_id = ? AND recipe_id = ?", session["user_id"], recipe[0]["id"])
-        return render_template("recipe.html", recipe=recipe, ingredient_list=ingredient_list)
+    else:
+        # get the name of the current recipe from the user table in the db
+        recipe_name = db.session.query(User).filter(User.id == session["user_id"]).first().current_recipe
+        # query the db row for the recipe
+        recipe = db.session.query(Recipe).filter(Recipe.name == recipe_name).filter(Recipe.user_id == session["user_id"]).first()
+        # query the ingredients table for all ingredients for the current recipe
+        ingredient_list = db.session.query(Ingredients).filter(Ingredients.user_id == session["user_id"]).filter(Ingredients.recipe_id == recipe.id)
+        # renders the template and sends the variables for use in the html/jinja
+        return render_template("recipe.html", recipe_name=recipe_name, recipe=recipe, ingredient_list=ingredient_list)
 
 
 @app.route("/ingredient", methods=["POST"])
 @login_required
 def ingredient():
+    # saves the form data in variables
     ingredient = request.form.get("ingredient")
     amount = request.form.get("ingredient_amount")
     recipe_id = request.form.get("ingredient_recipe")
-
-    rows = db.execute("SELECT * FROM ingredients WHERE user_id = ? AND recipe_id = ? AND item = ?", session["user_id"], recipe_id, ingredient)
-    if len(rows) != 0:
+    # query to see if the ingredient already exists for this user's recipe
+    rows = db.session.query(Ingredients).filter(Ingredients.user_id == session["user_id"]).filter(Ingredients.recipe_id == recipe_id).filter(Ingredients.item == ingredient).count()
+    if rows != 0:
         return apology("Ingredient already in recipe")
-
-    db.execute("INSERT INTO ingredients (user_id, recipe_id, amount, item) VALUES(?, ?, ?, ?)", session["user_id"], recipe_id, amount, ingredient)
+    # add the new ingredient row into the ingredients table in the db
+    data = Ingredients(user_id=session["user_id"], recipe_id=recipe_id, amount=amount, item=ingredient)
+    db.session.add(data)
+    db.session.commit()
     return redirect("/recipe")
 
 
 @app.route("/delete_ingredient", methods=["POST"])
 @login_required
 def delete_ingredient():
+    # gets the recipe name and id from the hidden input connected to the html element
     recipe_id = request.form.get("recipe_id")
-    recipe_name = request.form.get("recipe_name")
-    db.execute("DELETE FROM ingredients WHERE user_id = ? AND recipe_id = ? AND item = ?", session["user_id"], recipe_id, recipe_name)
+    recipe_ingredient = request.form.get("recipe_name")
+
+    db.session.query(Ingredients).filter(Ingredients.user_id == session["user_id"]).filter(Ingredients.recipe_id == recipe_id).filter(Ingredients.item == recipe_ingredient).delete()
+    db.session.commit()
     return redirect("/recipe")
 
 
@@ -235,7 +344,8 @@ def delete_ingredient():
 def prep():
     prep = request.form.get("prep")
     name = request.form.get("prep_recipe")
-    db.execute("UPDATE recipes SET prep_direction = ? WHERE user_id = ? AND name = ?", prep, session["user_id"], name)
+    db.session.query(Recipe).filter(Recipe.user_id == session["user_id"]).filter(Recipe.name == name).first().prep_direction = prep
+    db.session.commit()
     return redirect("/recipe")
 
 
@@ -244,7 +354,8 @@ def prep():
 def cook():
     cook = request.form.get("cook")
     name = request.form.get("cook_recipe")
-    db.execute("UPDATE recipes SET cook_direction = ? WHERE user_id = ? AND name = ?", cook, session["user_id"], name)
+    db.session.query(Recipe).filter(Recipe.user_id == session["user_id"]).filter(Recipe.name == name).first().cook_direction = cook
+    db.session.commit()
     return redirect("/recipe")
 
 
@@ -253,7 +364,8 @@ def cook():
 def note():
     notes = request.form.get("note")
     name = request.form.get("note_recipe")
-    db.execute("UPDATE recipes SET notes = ? WHERE user_id = ? AND name = ?", notes, session["user_id"], name)
+    db.session.query(Recipe).filter(Recipe.user_id == session["user_id"]).filter(Recipe.name == name).first().notes = notes
+    db.session.commit()
     return redirect("/recipe")
 
 
@@ -262,9 +374,7 @@ def note():
 def account():
     user_id = session["user_id"]
     if request.method == "POST":
-        # get old password hash
-        password_hash = db.execute("SELECT hash FROM users WHERE id = ?", user_id)
-
+        password_hash = db.session.query(User).filter(User.id == user_id).first().hash
         # get all form values
         old = request.form.get("old_password")
         new = request.form.get("password")
@@ -276,16 +386,17 @@ def account():
         if new != verify:
             return apology("New passwords don't match")
         # verify that the old password is correct
-        if not check_password_hash(password_hash[0]["hash"], old):
+        if not check_password_hash(password_hash, old):
             return apology("Incorrect password")
         # create a hash for the new password
         new_hash = generate_password_hash(new)
         # update SQL table with new hash
-        db.execute("UPDATE users SET hash = ? WHERE id = ?", new_hash, user_id)
+        db.session.query(User).filter(User.id == user_id).first().hash = new_hash
+        db.session.commit()
         return apology("Success")
 
     else:
         # get username
-        username = db.execute("SELECT username FROM users WHERE id = ?", user_id)
-        return render_template("account.html", username=username[0]["username"])
+        username = db.session.query(User).filter(User.id == user_id).first().username
+        return render_template("account.html", username=username)
 
