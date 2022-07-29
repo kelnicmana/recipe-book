@@ -320,7 +320,7 @@ def recipe():
 @app.route("/ingredientToList", methods=["POST"])
 @login_required
 def ingredientToList():
-    ingredient = request.form.get("ingredient")
+    ingredient = request.form.get("ingredientItem")
     # query to see if ingredient is already in user's list
     rows = db.session.query(List).filter(List.user_id == session["user_id"]).filter(List.item == ingredient).count()
     if rows != 0:
