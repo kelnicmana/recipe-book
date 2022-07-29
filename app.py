@@ -1,6 +1,5 @@
 import os
 
-#from cs50 import SQL
 from flask import Flask, flash, redirect, render_template, request, session
 from flask_session import Session
 from flask_sqlalchemy import SQLAlchemy
@@ -17,10 +16,10 @@ app = Flask(__name__)
 # heroku postgres url
 SQLALCHEMY_DATABASE_URL = "postgres://qdbbbsaexyymee:796582f42d29bf52bff19a0d3c8893916431886e1133f6e2a1fa0f30e33814fb@ec2-18-214-35-70.compute-1.amazonaws.com:5432/d82ot6jms8h2fj".replace("postgres://", "postgresql://", 1)
 
-app.config["SQLALCHEMY_DATABASE_URI"] = SQLALCHEMY_DATABASE_URL
+#app.config["SQLALCHEMY_DATABASE_URI"] = SQLALCHEMY_DATABASE_URL
 
 # dev postgres db
-# app.config["SQLALCHEMY_DATABASE_URI"] = 'postgresql://postgres:Eillek86@localhost/postgres_recipes'
+app.config["SQLALCHEMY_DATABASE_URI"] = 'postgresql://postgres:Eillek86@localhost/postgres_recipes'
 
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
@@ -300,7 +299,10 @@ def recipe():
         # query the ingredients table for all ingredients for the current recipe
         ingredient_list = db.session.query(Ingredients).filter(Ingredients.user_id == session["user_id"]).filter(Ingredients.recipe_id == recipe.id)
         # renders the template and sends the variables for use in the html/jinja
-        return render_template("recipe.html", recipe_name=recipe_name, recipe=recipe, ingredient_list=ingredient_list)
+        prep_steps = recipe.prep_direction.split("...")
+        cook_steps = recipe.cook_direction.split("...")
+        note_steps = recipe.notes.split("...")
+        return render_template("recipe.html", recipe_name=recipe_name, recipe=recipe, ingredient_list=ingredient_list, prep_steps=prep_steps, cook_steps=cook_steps, note_steps=note_steps)
     else:
         # get the name of the current recipe from the user table in the db
         recipe_name = db.session.query(User).filter(User.id == session["user_id"]).first().current_recipe
@@ -309,7 +311,10 @@ def recipe():
         # query the ingredients table for all ingredients for the current recipe
         ingredient_list = db.session.query(Ingredients).filter(Ingredients.user_id == session["user_id"]).filter(Ingredients.recipe_id == recipe.id)
         # renders the template and sends the variables for use in the html/jinja
-        return render_template("recipe.html", recipe_name=recipe_name, recipe=recipe, ingredient_list=ingredient_list)
+        prep_steps = recipe.prep_direction.split("...")
+        cook_steps = recipe.cook_direction.split("...")
+        note_steps = recipe.notes.split("...")
+        return render_template("recipe.html", recipe_name=recipe_name, recipe=recipe, ingredient_list=ingredient_list, prep_steps=prep_steps, cook_steps=cook_steps, note_steps=note_steps)
 
 
 @app.route("/ingredient", methods=["POST"])

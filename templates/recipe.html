@@ -6,9 +6,8 @@
 
 {% block main %}
     <div class="container">
-        <div class="card">
-            <h1 class="card-header display-5 mb-3">{{ recipe.name }}</h1>
-        <div class="card mb-3 mx-auto" style="width: 80%;">
+        <h1 class="display-5 mb-3">{{ recipe.name }}</h1>
+        <div class="card mb-3 mx-auto">
             <div class="card-header recipe_header">
               <span class="lead">Ingredients</span><span class="ms-5 small">
                     <button type="button" class="btn bg-transparent btn-sm" data-bs-toggle="modal" data-bs-target="#ingredientModal">
@@ -35,7 +34,8 @@
                 {% endfor %}
             </ul>
         </div>
-        <div class="card mb-3 mx-auto" style="width: 80%;">
+        
+        <div class="card mb-3 mx-auto">
             <div class="card-header recipe_header">
                 <span class="lead">Preperation Directions</span><span class="ms-5 small">
                     <button type="button" class="btn bg-transparent btn-sm" data-bs-toggle="modal" data-bs-target="#prepModal">
@@ -44,16 +44,20 @@
                 </span>
             </div>
             {% if recipe.prep_direction == "" %}
-            <div class="card-body mx-2 text-muted">
-                Click edit to add
-            </div>
+                <div class="card-body mx-2 text-muted">
+                    Click edit to add
+                </div>
             {% else %}
-            <div class="card-body mx-2">
-                {{ recipe.prep_direction }}
-            </div>
+                <ul class="list-group list-group-numbered list-group-flush">
+                    {% for step in prep_steps %}
+                        {% if step | length > 0  %}
+                            <li class="list-group-item mx-3"><span>{{ step }}</span></li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
             {% endif %}
         </div>
-        <div class="card mb-3 mx-auto" style="width: 80%;">
+        <div class="card mb-3 mx-auto">
             <div class="card-header recipe_header">
                 <span class="lead">Cooking Directions</span><span class="ms-5 small">
                     <button type="button" class="btn bg-transparent btn-sm" data-bs-toggle="modal" data-bs-target="#cookModal">
@@ -66,12 +70,16 @@
                 Click edit to add
             </div>
             {% else %}
-            <div class="card-body mx-2">
-                {{ recipe.cook_direction }}
-            </div>
+                <ul class="list-group list-group-numbered list-group-flush">
+                    {% for step in cook_steps %}
+                        {% if step | length > 0  %}
+                            <li class="list-group-item mx-3"><span>{{ step }}</span></li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
             {% endif %}
         </div>
-        <div class="card mb-3 mx-auto" style="width: 80%;">
+        <div class="card mb-3 mx-auto">
             <div class="card-header recipe_header">
                 <span class="lead">Notes</span><span class="ms-5 small">
                     <button type="button" class="btn bg-transparent btn-sm" data-bs-toggle="modal" data-bs-target="#noteModal">
@@ -84,11 +92,14 @@
                 Click edit to add
             </div>
             {% else %}
-            <div class="card-body mx-2">
-                {{ recipe.notes }}
-            </div>
+                <ul class="list-group list-group-flush">
+                    {% for step in note_steps %}
+                        {% if step | length > 0  %}
+                            <li class="list-group-item mx-3"><span>{{ step }}</span></li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
             {% endif %}
-        </div>
         </div>
     </div>
 
@@ -133,10 +144,10 @@
                     <form action="/prep" method="post">
                         <div class="mb-3">
                             <input type="hidden" id="prep_recipe" name="prep_recipe" value="{{ recipe.name }}">
-                            {% if not recipe.notes %}
-                                <textarea autocomplete="off" class="form-control" id="prep" name="prep" placeholder="preperation directions" rows="3" required></textarea>
+                            {% if recipe.prep_direction == "" %}
+                                <textarea autocomplete="off" class="form-control" id="prep" name="prep" placeholder="Please put ... at the end of each step" rows="3" required></textarea>
                             {% else %}
-                                <textarea autocomplete="off" class="form-control" id="prep" name="prep" placeholder="preperation directions" rows="3" required>{{ recipe.prep_direction }}</textarea>
+                                <textarea autocomplete="off" class="form-control" id="prep" name="prep" rows="3">{{ recipe.prep_direction }}</textarea>
                             {% endif %}
                         </div>
                         <div class="mb-3 text-center">
@@ -162,10 +173,10 @@
                     <form action="/cook" method="post">
                         <div class="mb-3">
                             <input type="hidden" id="cook_recipe" name="cook_recipe" value="{{ recipe.name }}">
-                            {% if not recipe.notes %}
-                                <textarea autocomplete="off" class="form-control" id="cook" name="cook" placeholder="cooking directions" rows="3" required></textarea>
+                            {% if not recipe.cook_direction %}
+                                <textarea autocomplete="off" class="form-control" id="cook" name="cook" placeholder="Please put ... at the end of each step" rows="3" required></textarea>
                             {% else %}
-                                <textarea autocomplete="off" class="form-control" id="cook" name="cook" placeholder="cooking directions" rows="3" required>{{ recipe.cook_direction }}</textarea>
+                                <textarea autocomplete="off" class="form-control" id="cook" name="cook" rows="3">{{ recipe.cook_direction }}</textarea>
                             {% endif %}
                         </div>
                         <div class="mb-3 text-center">
@@ -192,9 +203,9 @@
                         <div class="mb-3">
                             <input type="hidden" id="note_recipe" name="note_recipe" value="{{ recipe.name }}">
                             {% if not recipe.notes %}
-                                <textarea autocomplete="off" class="form-control" id="note" name="note" placeholder="notes" rows="3" required></textarea>
+                                <textarea autocomplete="off" class="form-control" id="note" name="note" placeholder="Please put ... at the end of each note" rows="3" required></textarea>
                             {% else %}
-                                <textarea autocomplete="off" class="form-control" id="note" name="note" placeholder="notes" rows="3" required>{{ recipe.notes }}</textarea>
+                                <textarea autocomplete="off" class="form-control" id="note" name="note" placeholder="notes" rows="3">{{ recipe.notes }}</textarea>
                             {% endif %}
                         </div>
                         <div class="mb-3 text-center">
