@@ -26,7 +26,7 @@
                     <div class="modal-body">
                         <form action="/list" method="post">
                             <div class="mb-3">
-                                <input autocapitalize="none" autocomplete="off" class="form-control" id="item" name="item" placeholder="item" type="text" maxlength="35" required>
+                                <input autocomplete="off" class="form-control" id="item" name="item" placeholder="item" type="text" maxlength="35" required>
                             </div>
                             <div class="mb-3">
                                 <textarea autocomplete="off" class="form-control" id="notes" name="notes" placeholder="notes (optional)" rows="3"></textarea>
@@ -75,7 +75,6 @@
                         </button>
 
                         <!-- notes modals -->
-                        {% for each in all_items %}
                         <div class="modal fade" id="{{ each.item }}" tabindex="-1" role="dialog" aria-labelledby="{{ each.item }}Label" aria-hidden="true">
                             <div class="modal-dialog modal-dialog-centered" role="document">
                                 <div class="modal-content">
@@ -100,7 +99,7 @@
                                 </div>
                             </div>
                         </div> 
-                    {% endfor %}
+                    
     
                     </td>
                     <td>

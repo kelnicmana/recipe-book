@@ -16,10 +16,10 @@ app = Flask(__name__)
 # heroku postgres url
 SQLALCHEMY_DATABASE_URL = "postgres://qdbbbsaexyymee:796582f42d29bf52bff19a0d3c8893916431886e1133f6e2a1fa0f30e33814fb@ec2-18-214-35-70.compute-1.amazonaws.com:5432/d82ot6jms8h2fj".replace("postgres://", "postgresql://", 1)
 
-#app.config["SQLALCHEMY_DATABASE_URI"] = SQLALCHEMY_DATABASE_URL
+app.config["SQLALCHEMY_DATABASE_URI"] = SQLALCHEMY_DATABASE_URL
 
 # dev postgres db
-app.config["SQLALCHEMY_DATABASE_URI"] = 'postgresql://postgres:Eillek86@localhost/postgres_recipes'
+#app.config["SQLALCHEMY_DATABASE_URI"] = 'postgresql://postgres:Eillek86@localhost/postgres_recipes'
 
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
@@ -315,6 +315,21 @@ def recipe():
         cook_steps = recipe.cook_direction.split("...")
         note_steps = recipe.notes.split("...")
         return render_template("recipe.html", recipe_name=recipe_name, recipe=recipe, ingredient_list=ingredient_list, prep_steps=prep_steps, cook_steps=cook_steps, note_steps=note_steps)
+
+
+@app.route("/ingredientToList", methods=["POST"])
+@login_required
+def ingredientToList():
+    ingredient = request.form.get("ingredient")
+    # query to see if ingredient is already in user's list
+    rows = db.session.query(List).filter(List.user_id == session["user_id"]).filter(List.item == ingredient).count()
+    if rows != 0:
+        return redirect("/recipe")
+    # add the item to the list table in the db
+    data = List(user_id=session["user_id"], item=ingredient, note="", status="on")
+    db.session.add(data)
+    db.session.commit()
+    return redirect("/recipe")
 
 
 @app.route("/ingredient", methods=["POST"])

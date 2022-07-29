@@ -17,7 +17,36 @@
             </div>
             <ul class="list-group list-group-flush">
                 {% for ingredient in ingredient_list %}
-                    <li class="list-group-item mx-3 ingredients_li"><span>{{ ingredient.amount }} {{ ingredient.item }}</span>
+                    <li class="list-group-item mx-3 ingredients_li">
+                        
+                        <button type="button" class="btn bg-transparent btn-sm" data-bs-toggle="modal" data-bs-target="#{{ ingredient.item }}">{{ ingredient.amount }} {{ ingredient.item }}</button>
+
+                        <!-- ingredient add to list modals -->
+                        <div class="modal fade" id="{{ ingredient.item }}" tabindex="-1" role="dialog" aria-labelledby="{{ ingredient.item }}Label" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="{{ ingredient.item }}Label">Add {{ ingredient.item }} to list</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true"></span>
+                                        </button>
+                                    </div>
+                                
+                                    <div class="modal-body">
+                                        <div class="mb-3">
+                                            <form action="/ingredientToList" method="post">
+                                                <input type="hidden" id="ingredient" name="ingredient" value="{{ ingredient.item }}">
+                                                <button type="submit" class="btn btn-primary">Add to list</button>
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Nevermind</button>
+                                            </form>
+                                        </div>
+                                        
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+
                         <form action="/delete_ingredient" method="post">
                             <input type="hidden" id="recipe_id" name="recipe_id" value="{{ ingredient.recipe_id }}">
                             <input type="hidden" id="recipe_name" name="recipe_name" value="{{ ingredient.item }}">
