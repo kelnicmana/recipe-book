@@ -19,10 +19,10 @@
                 {% for ingredient in ingredient_list %}
                     <li class="list-group-item mx-3 ingredients_li">
                         
-                        <button type="button" class="btn bg-transparent btn-sm" data-bs-toggle="modal" data-bs-target="#{{ ingredient.id }}">{{ ingredient.amount }} {{ ingredient.item }}</button>
+                        <button type="button" class="btn bg-transparent btn-sm" data-bs-toggle="modal" data-bs-target="#item{{ ingredient.id }}">{{ ingredient.amount }} {{ ingredient.item }}</button>
 
                         <!-- ingredient add to list modals -->
-                        <div class="modal fade" id="{{ ingredient.id }}" tabindex="-1" role="dialog" aria-labelledby="{{ ingredient.id }}Label" aria-hidden="true">
+                        <div class="modal fade" id="item{{ ingredient.id }}" tabindex="-1" role="dialog" aria-labelledby="{{ ingredient.id }}Label" aria-hidden="true">
                             <div class="modal-dialog modal-dialog-centered" role="document">
                                 <div class="modal-content">
                                     <div class="modal-header">

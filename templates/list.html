@@ -66,7 +66,7 @@
                                 {% endif %}
                             </button>
                         </form>
-                        <button type="button" class="btn bg-transparent" data-bs-toggle="modal" data-bs-target="#{{ each.id }}">
+                        <button type="button" class="btn bg-transparent" data-bs-toggle="modal" data-bs-target="#item{{ each.id }}">
                             {% if each.status == "on" %}
                                 <span class="items">{{ each.item }}</span>
                             {% else %}
@@ -75,7 +75,7 @@
                         </button>
 
                         <!-- notes modals -->
-                        <div class="modal fade" id="{{ each.id }}" tabindex="-1" role="dialog" aria-labelledby="{{ each.id }}Label" aria-hidden="true">
+                        <div class="modal fade" id="item{{ each.id }}" tabindex="-1" role="dialog" aria-labelledby="{{ each.id }}Label" aria-hidden="true">
                             <div class="modal-dialog modal-dialog-centered" role="document">
                                 <div class="modal-content">
                                     <div class="modal-header">
