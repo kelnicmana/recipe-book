@@ -141,7 +141,7 @@ def index():
         return redirect("/")
 
     else:
-        recipe_list = db.session.query(Recipe).filter(Recipe.user_id == session["user_id"])
+        recipe_list = db.session.query(Recipe).filter(Recipe.user_id == session["user_id"]).order_by(asc(Recipe.id))
         return render_template("index.html", recipe_list=recipe_list)
 
 
@@ -299,9 +299,9 @@ def recipe():
         # query the ingredients table for all ingredients for the current recipe
         ingredient_list = db.session.query(Ingredients).filter(Ingredients.user_id == session["user_id"]).filter(Ingredients.recipe_id == recipe.id)
         # renders the template and sends the variables for use in the html/jinja
-        prep_steps = recipe.prep_direction.split("...")
-        cook_steps = recipe.cook_direction.split("...")
-        note_steps = recipe.notes.split("...")
+        prep_steps = recipe.prep_direction.split("\n")
+        cook_steps = recipe.cook_direction.split("\n")
+        note_steps = recipe.notes.split("\n")
         return render_template("recipe.html", recipe_name=recipe_name, recipe=recipe, ingredient_list=ingredient_list, prep_steps=prep_steps, cook_steps=cook_steps, note_steps=note_steps)
     else:
         # get the name of the current recipe from the user table in the db
@@ -311,9 +311,9 @@ def recipe():
         # query the ingredients table for all ingredients for the current recipe
         ingredient_list = db.session.query(Ingredients).filter(Ingredients.user_id == session["user_id"]).filter(Ingredients.recipe_id == recipe.id)
         # renders the template and sends the variables for use in the html/jinja
-        prep_steps = recipe.prep_direction.split("...")
-        cook_steps = recipe.cook_direction.split("...")
-        note_steps = recipe.notes.split("...")
+        prep_steps = recipe.prep_direction.split("\n")
+        cook_steps = recipe.cook_direction.split("\n")
+        note_steps = recipe.notes.split("\n")
         return render_template("recipe.html", recipe_name=recipe_name, recipe=recipe, ingredient_list=ingredient_list, prep_steps=prep_steps, cook_steps=cook_steps, note_steps=note_steps)
 
 

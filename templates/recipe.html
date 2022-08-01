@@ -174,7 +174,7 @@
                         <div class="mb-3">
                             <input type="hidden" id="prep_recipe" name="prep_recipe" value="{{ recipe.name }}">
                             {% if recipe.prep_direction == "" %}
-                                <textarea autocomplete="off" class="form-control" id="prep" name="prep" placeholder="Please put ... at the end of each step" rows="3" required></textarea>
+                                <textarea autocomplete="off" class="form-control" id="prep" name="prep" placeholder="Please press enter at the end of each step" rows="3" required></textarea>
                             {% else %}
                                 <textarea autocomplete="off" class="form-control" id="prep" name="prep" rows="3">{{ recipe.prep_direction }}</textarea>
                             {% endif %}
@@ -203,7 +203,7 @@
                         <div class="mb-3">
                             <input type="hidden" id="cook_recipe" name="cook_recipe" value="{{ recipe.name }}">
                             {% if not recipe.cook_direction %}
-                                <textarea autocomplete="off" class="form-control" id="cook" name="cook" placeholder="Please put ... at the end of each step" rows="3" required></textarea>
+                                <textarea autocomplete="off" class="form-control" id="cook" name="cook" placeholder="Please press enter at the end of each step" rows="3" required></textarea>
                             {% else %}
                                 <textarea autocomplete="off" class="form-control" id="cook" name="cook" rows="3">{{ recipe.cook_direction }}</textarea>
                             {% endif %}
@@ -232,7 +232,7 @@
                         <div class="mb-3">
                             <input type="hidden" id="note_recipe" name="note_recipe" value="{{ recipe.name }}">
                             {% if not recipe.notes %}
-                                <textarea autocomplete="off" class="form-control" id="note" name="note" placeholder="Please put ... at the end of each note" rows="3" required></textarea>
+                                <textarea autocomplete="off" class="form-control" id="note" name="note" placeholder="Please press enter at the end of each note" rows="3" required></textarea>
                             {% else %}
                                 <textarea autocomplete="off" class="form-control" id="note" name="note" placeholder="notes" rows="3">{{ recipe.notes }}</textarea>
                             {% endif %}
