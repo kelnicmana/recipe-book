@@ -7,6 +7,11 @@
 {% block main %}
     <div class="container">
         <h1 class="display-5 mb-3">{{ recipe.name }}</h1>
+        {% if error %}
+            <div class="alert alert-danger" role="alert">
+                {{ error }}
+            </div>
+        {% endif %}
         <div class="card mb-3 mx-auto">
             <div class="card-header recipe_header">
               <span class="lead">Ingredients</span><span class="ms-5 small">

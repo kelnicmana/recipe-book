@@ -108,9 +108,6 @@ def after_request(response):
     response.headers["Pragma"] = "no-cache"
     return response
 
-def apology(message):
-    """Render message as an apology to user."""
-    return render_template("apology.html", error=message)
 
 def login_required(f):
     """
@@ -124,6 +121,7 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+
 @app.route("/", methods=["GET", "POST"])
 @login_required
 def index():
@@ -132,7 +130,8 @@ def index():
 
         rows = db.session.query(Recipe).filter(Recipe.name == name).filter(Recipe.user_id == session["user_id"]).count()
         if rows != 0:
-            return apology("That recipe name already exists")
+            recipe_list = db.session.query(Recipe).filter(Recipe.user_id == session["user_id"]).order_by(asc(Recipe.id))
+            return render_template("index.html", recipe_list=recipe_list, error="That recipe name already exists")
 
         data = Recipe(user_id=session["user_id"], name=name, prep_direction="", cook_direction="", notes="")
         db.session.add(data)
@@ -163,7 +162,8 @@ def shopping_list():
 
         rows = db.session.query(List).filter(List.user_id == session["user_id"]).filter(List.item == item).count()
         if rows != 0:
-            return apology("Item already in list")
+            all_items = db.session.query(List).filter(List.user_id == session["user_id"]).order_by(asc(List.id))
+            return render_template("list.html", all_items=all_items, error="Item already in list")
 
         data = List(user_id=session["user_id"], item=item, note=notes, status="on")
         db.session.add(data)
@@ -192,6 +192,7 @@ def toggle_item():
         db.session.commit()
     return redirect("/list")
 
+
 @app.route("/delete_item", methods=["POST"])
 @login_required
 def delete_item():
@@ -199,6 +200,7 @@ def delete_item():
     db.session.query(List).filter(List.user_id == session["user_id"]).filter(List.item == item).delete()
     db.session.commit()
     return redirect("/list")
+
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
@@ -209,15 +211,15 @@ def register():
 
         # verifies all fields are filled
         if username == "" or password == "" or verify_password == "":
-            return apology("All fields must be completed")
+            return render_template("register.html", error="All fields must be completed")
         # verifies password matched the verify password field
         if password != verify_password:
-            return apology("Password fields do not match")
+            return render_template("register.html", error="Password fields do not match")
 
         # verifies that the username is not already in use
         rows = db.session.query(User).filter(User.username == username).count()
         if rows != 0:
-            return apology("Username is unavailable")
+            return render_template("register.html", error="Username is unavailable")
 
         hash = generate_password_hash(password)
 
@@ -247,11 +249,11 @@ def login():
 
         # Ensure username was submitted
         if not request.form.get("username"):
-            return apology("must provide username")
+            return render_template("login.html", error="must provide username")
 
         # Ensure password was submitted
         elif not request.form.get("password"):
-            return apology("must provide password")
+            return render_template("login.html", error="must provide password")
 
         # Query database for username
         username = request.form.get("username")
@@ -260,7 +262,7 @@ def login():
 
         # Ensure username exists and password is correct
         if rows != 1 or not check_password_hash(user_data[0].hash, request.form.get("password")):
-            return apology("invalid username and/or password")
+            return render_template("login.html", error="invalid username and/or password")
 
         # Remember which user has logged in
         session["user_id"] = user_data[0].id
@@ -342,7 +344,18 @@ def ingredient():
     # query to see if the ingredient already exists for this user's recipe
     rows = db.session.query(Ingredients).filter(Ingredients.user_id == session["user_id"]).filter(Ingredients.recipe_id == recipe_id).filter(Ingredients.item == ingredient).count()
     if rows != 0:
-        return apology("Ingredient already in recipe")
+        # get the name of the current recipe from the user table in the db
+        recipe_name = db.session.query(User).filter(User.id == session["user_id"]).first().current_recipe
+        # query the db row for the recipe
+        recipe = db.session.query(Recipe).filter(Recipe.name == recipe_name).filter(Recipe.user_id == session["user_id"]).first()
+        # query the ingredients table for all ingredients for the current recipe
+        ingredient_list = db.session.query(Ingredients).filter(Ingredients.user_id == session["user_id"]).filter(Ingredients.recipe_id == recipe.id)
+        # renders the template and sends the variables for use in the html/jinja
+        prep_steps = recipe.prep_direction.split("\n")
+        cook_steps = recipe.cook_direction.split("\n")
+        note_steps = recipe.notes.split("\n")
+        return render_template("recipe.html", recipe_name=recipe_name, recipe=recipe, ingredient_list=ingredient_list, prep_steps=prep_steps, cook_steps=cook_steps, note_steps=note_steps, error="Ingredient already in recipe")
+
     # add the new ingredient row into the ingredients table in the db
     data = Ingredients(user_id=session["user_id"], recipe_id=recipe_id, amount=amount, item=ingredient)
     db.session.add(data)
@@ -404,19 +417,24 @@ def account():
         verify = request.form.get("confirmation")
         # ensure no form fields are empty
         if old == "" or new == "" or verify == "":
-            return apology("Complete all fields")
-        # verify that new password fields match
-        if new != verify:
-            return apology("New passwords don't match")
+            username = db.session.query(User).filter(User.id == user_id).first().username
+            return render_template("account.html", username=username, error="Complete all fields")
         # verify that the old password is correct
         if not check_password_hash(password_hash, old):
-            return apology("Incorrect password")
+            username = db.session.query(User).filter(User.id == user_id).first().username
+            return render_template("account.html", username=username, error="Incorrect password")
+        # verify that new password fields match
+        if new != verify:
+            username = db.session.query(User).filter(User.id == user_id).first().username
+            return render_template("account.html", username=username, error="New passwords don't match")
+
         # create a hash for the new password
         new_hash = generate_password_hash(new)
         # update SQL table with new hash
         db.session.query(User).filter(User.id == user_id).first().hash = new_hash
         db.session.commit()
-        return apology("Success")
+        username = db.session.query(User).filter(User.id == user_id).first().username
+        return render_template("account.html", username=username, success="Success!")
 
     else:
         # get username

@@ -16,6 +16,18 @@
                         </p>
                     </li>
                     <li class="list-group-item">
+                        {% if success %}
+                            <div class="alert alert-success" role="alert">
+                                {{ success }}
+                            </div>
+                        {% endif %}
+                        
+                        {% if error %}
+                            <div class="alert alert-danger" role="alert">
+                                {{ error }}
+                            </div>
+                        {% endif %}
+
                         <p class="h5 mx-2 my-3 mb-3">Change password:</p>
                         <form class="mx-4" action="/account" method="post">
                             <div class="mb-3">
