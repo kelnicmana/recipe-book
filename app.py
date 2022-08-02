@@ -13,7 +13,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "superSecretKey"
-app.permanent_session_lifetime = timedelta(days=14)
+app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=14)
 
 
 # heroku postgres url
