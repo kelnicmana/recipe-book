@@ -211,7 +211,7 @@ def register():
 
         # verifies all fields are filled
         if username == "" or password == "" or verify_password == "":
-            return render_template("register.html", error="All fields must be completed")
+            return render_template("register.html", error="Please complete all fields")
         # verifies password matched the verify password field
         if password != verify_password:
             return render_template("register.html", error="Password fields do not match")
@@ -249,11 +249,11 @@ def login():
 
         # Ensure username was submitted
         if not request.form.get("username"):
-            return render_template("login.html", error="must provide username")
+            return render_template("login.html", error="Please enter your username")
 
         # Ensure password was submitted
         elif not request.form.get("password"):
-            return render_template("login.html", error="must provide password")
+            return render_template("login.html", error="Please enter your password")
 
         # Query database for username
         username = request.form.get("username")
@@ -262,7 +262,7 @@ def login():
 
         # Ensure username exists and password is correct
         if rows != 1 or not check_password_hash(user_data[0].hash, request.form.get("password")):
-            return render_template("login.html", error="invalid username and/or password")
+            return render_template("login.html", error="Invalid username and/or password")
 
         # Remember which user has logged in
         session["user_id"] = user_data[0].id
@@ -326,12 +326,32 @@ def ingredientToList():
     # query to see if ingredient is already in user's list
     rows = db.session.query(List).filter(List.user_id == session["user_id"]).filter(List.item == ingredient).count()
     if rows != 0:
-        return redirect("/recipe")
+        # get the name of the current recipe from the user table in the db
+        recipe_name = db.session.query(User).filter(User.id == session["user_id"]).first().current_recipe
+        # query the db row for the recipe
+        recipe = db.session.query(Recipe).filter(Recipe.name == recipe_name).filter(Recipe.user_id == session["user_id"]).first()
+        # query the ingredients table for all ingredients for the current recipe
+        ingredient_list = db.session.query(Ingredients).filter(Ingredients.user_id == session["user_id"]).filter(Ingredients.recipe_id == recipe.id)
+        # renders the template and sends the variables for use in the html/jinja
+        prep_steps = recipe.prep_direction.split("\n")
+        cook_steps = recipe.cook_direction.split("\n")
+        note_steps = recipe.notes.split("\n")
+        return render_template("recipe.html", recipe_name=recipe_name, recipe=recipe, ingredient_list=ingredient_list, prep_steps=prep_steps, cook_steps=cook_steps, note_steps=note_steps, error="Item is already in your list")
     # add the item to the list table in the db
     data = List(user_id=session["user_id"], item=ingredient, note="", status="on")
     db.session.add(data)
     db.session.commit()
-    return redirect("/recipe")
+    # get the name of the current recipe from the user table in the db
+    recipe_name = db.session.query(User).filter(User.id == session["user_id"]).first().current_recipe
+    # query the db row for the recipe
+    recipe = db.session.query(Recipe).filter(Recipe.name == recipe_name).filter(Recipe.user_id == session["user_id"]).first()
+    # query the ingredients table for all ingredients for the current recipe
+    ingredient_list = db.session.query(Ingredients).filter(Ingredients.user_id == session["user_id"]).filter(Ingredients.recipe_id == recipe.id)
+    # renders the template and sends the variables for use in the html/jinja
+    prep_steps = recipe.prep_direction.split("\n")
+    cook_steps = recipe.cook_direction.split("\n")
+    note_steps = recipe.notes.split("\n")
+    return render_template("recipe.html", recipe_name=recipe_name, recipe=recipe, ingredient_list=ingredient_list, prep_steps=prep_steps, cook_steps=cook_steps, note_steps=note_steps, success="Item added to your list")
 
 
 @app.route("/ingredient", methods=["POST"])
@@ -369,7 +389,7 @@ def delete_ingredient():
     # gets the recipe name and id from the hidden input connected to the html element
     recipe_id = request.form.get("recipe_id")
     recipe_ingredient = request.form.get("recipe_name")
-
+    # 
     db.session.query(Ingredients).filter(Ingredients.user_id == session["user_id"]).filter(Ingredients.recipe_id == recipe_id).filter(Ingredients.item == recipe_ingredient).delete()
     db.session.commit()
     return redirect("/recipe")
@@ -418,7 +438,7 @@ def account():
         # ensure no form fields are empty
         if old == "" or new == "" or verify == "":
             username = db.session.query(User).filter(User.id == user_id).first().username
-            return render_template("account.html", username=username, error="Complete all fields")
+            return render_template("account.html", username=username, error="Please complete all fields")
         # verify that the old password is correct
         if not check_password_hash(password_hash, old):
             username = db.session.query(User).filter(User.id == user_id).first().username

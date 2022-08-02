@@ -7,6 +7,12 @@
 {% block main %}
     <div class="container">
         <h1 class="display-5 mb-3">{{ recipe.name }}</h1>
+        {% if success %}
+            <div class="alert alert-success" role="alert">
+                {{ success }}
+            </div>
+        {% endif %}
+        
         {% if error %}
             <div class="alert alert-danger" role="alert">
                 {{ error }}
@@ -41,8 +47,8 @@
                                         <div class="mb-3">
                                             <form action="/ingredientToList" method="post">
                                                 <input type="hidden" id="ingredientItem" name="ingredientItem" value="{{ ingredient.item }}">
-                                                <button type="submit" class="btn btn-primary">Add to list</button>
-                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Nevermind</button>
+                                                <button type="submit" class="btn btn-secondary">Add to list</button>
+                                                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Nevermind</button>
                                             </form>
                                         </div>
                                         
@@ -152,8 +158,8 @@
                     <form action="/ingredient" method="post">
                         <div class="mb-3">
                             <input type="hidden" id="ingredient_recipe" name="ingredient_recipe" value="{{ recipe.id }}">
-                            <input autocomplete="off" class="form-control mb-3" id="ingredient" name="ingredient" placeholder="ingredient" type="text" maxlength="35" required>
-                            <input autocomplete="off" class="form-control mb-3" id="ingredient_amount" name="ingredient_amount" placeholder="amount (example: 1 cup) (optional)" type="text" maxlength="35">  
+                            <input autocapitalize="off" autocomplete="off" class="form-control mb-3" id="ingredient" name="ingredient" placeholder="ingredient" type="text" maxlength="35" required>
+                            <input autocapitalize="off" autocomplete="off" class="form-control mb-3" id="ingredient_amount" name="ingredient_amount" placeholder="amount (example: 1 cup) (optional)" type="text" maxlength="35">  
                         </div>
                         <div class="mb-3 text-center">
                             <button type="submit" class="btn btn-secondary">Add</button>
