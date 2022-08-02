@@ -1,5 +1,6 @@
 import os
 
+from datetime import timedelta
 from flask import Flask, flash, redirect, render_template, request, session
 from flask_session import Session
 from flask_sqlalchemy import SQLAlchemy
@@ -11,6 +12,8 @@ from tempfile import mkdtemp
 from werkzeug.security import check_password_hash, generate_password_hash
 
 app = Flask(__name__)
+app.config["SECRET_KEY"] = "superSecretKey"
+app.permanent_session_lifetime = timedelta(days=14)
 
 
 # heroku postgres url
@@ -93,12 +96,6 @@ class List(db.Model):
 # Ensure templates are auto-reloaded
 app.config["TEMPLATES_AUTO_RELOAD"] = True
 
-# Configure session to use filesystem (instead of signed cookies)
-app.config["SESSION_PERMANENT"] = True
-app.config["SESSION_TYPE"] = "filesystem"
-Session(app)
-
-#db = SQL("sqlite:///recipes.db")
 
 @app.after_request
 def after_request(response):
@@ -265,6 +262,7 @@ def login():
             return render_template("login.html", error="Invalid username and/or password")
 
         # Remember which user has logged in
+        session.permanent = True
         session["user_id"] = user_data[0].id
 
         # Redirect user to home page
