@@ -9,7 +9,7 @@
 
         <button type="button" class="btn btn-secondary mb-3" data-bs-toggle="modal" data-bs-target="#recipeModal">
             <p class="lead m-0">Add recipe</p>
-        </button>
+        </button> 
         
         <div class="modal fade" id="recipeModal" tabindex="-1" role="dialog" aria-labelledby="recipeModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered" role="document">
@@ -50,7 +50,7 @@
             <tbody>
                 {% for recipe in recipe_list %}
                     <tr>
-                        <td>
+                        <td class="align-middle">
                             <form action="/recipe" method="post">
                                 <input type="hidden" id="recipeName" name="recipeName" value="{{ recipe.name }}">
                                 <button class="btn bg-transparent py-0" type="submit">{{ recipe.name }}</button>
