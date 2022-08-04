@@ -8,10 +8,23 @@
     align-items: center;
 }
 
-.trash {
+.icon {
     display: flex;
 }
 
 .fake-btn:focus {
-    box-shadow: none;  
+    box-shadow: none;
+}
+
+.flex {
+    display: flex;
+    height: 2rem;
+    justify-content: start;
+    align-items: flex-end;
+}
+
+.box-and-text {
+    display: flex;
+    align-items: center;
+    vertical-align: middle !important;
 }
