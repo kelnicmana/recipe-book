@@ -1,4 +1,5 @@
 import os
+import cs50
 
 from datetime import timedelta
 from flask import Flask, flash, redirect, render_template, request, session
