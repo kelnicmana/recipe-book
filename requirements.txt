@@ -1,4 +1,4 @@
-attrs==22.1.0
+attrs==20.3.0
 Automat==20.2.0
 blinker==1.5
 cachelib==0.9.0
