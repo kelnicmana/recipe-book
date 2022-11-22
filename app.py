@@ -17,8 +17,8 @@ app.config["SECRET_KEY"] = "superSecretKey"
 app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=14)
 
 
-# heroku postgres url
-SQLALCHEMY_DATABASE_URL = "postgres://qdbbbsaexyymee:796582f42d29bf52bff19a0d3c8893916431886e1133f6e2a1fa0f30e33814fb@ec2-18-214-35-70.compute-1.amazonaws.com:5432/d82ot6jms8h2fj".replace("postgres://", "postgresql://", 1)
+# railway postgres url
+SQLALCHEMY_DATABASE_URL = "postgresql://postgres:nGLnW4Lfivkyzs0S8SUa@containers-us-west-111.railway.app:7408/railway"
 
 app.config["SQLALCHEMY_DATABASE_URI"] = SQLALCHEMY_DATABASE_URL
 
