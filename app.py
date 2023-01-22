@@ -18,7 +18,7 @@ app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=14)
 
 
 # railway postgres url
-SQLALCHEMY_DATABASE_URL = "postgresql://postgres:2zcW58qlJgF4vNQ2gGgt@containers-us-west-111.railway.app:7408/railway"
+SQLALCHEMY_DATABASE_URL = "postgresql://postgres:xa8GvvkVwSrMVKiAXFYl@containers-us-west-111.railway.app:7408/railway"
 
 app.config["SQLALCHEMY_DATABASE_URI"] = SQLALCHEMY_DATABASE_URL
 
